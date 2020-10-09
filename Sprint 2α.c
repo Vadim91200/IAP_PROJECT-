@@ -37,7 +37,7 @@ int get_int() {
 	return atoi(buffer);
 }
 // Donnees
-// s p e c i a l i t e s −−−−−−−−−−−−−−−−−−−−−
+// specialites −−−−−−−−−−−−−−−−−−−−−
 #define MAX_SPECIALITES 10
 typedef struct{
 Mot nom;
@@ -65,27 +65,31 @@ unsigned int nb_clients;
 } Clients;
 // Instructions --------------------------------------------------------------- 
 // developpe --------------------------- 
-void traite_developpe() {
-	Mot nom_specialite;
-	get_id(nom_specialite);
-	int cout_horaire = get_int();
-	printf(MSG_DEVELOPPE, nom_specialite, cout_horaire);
+void traite_developpe(Specialites* Spe) {
+	get_id(Spe->tab_specialites[Spe->nb_specialites].nom);
+	Spe->tab_specialites[Spe->nb_specialites].cout_horaire = get_int();
+	Spe->nb_specialites += 1;
+
 }
-void traite_specialites() {
-	printf(MSG_SPECIALITE);
+void traite_specialites(Specialites* list_spe) {
+	unsigned int i;
+	printf("specialites traitees : ");
+	for (i = 0; i < list_spe->nb_specialites-1; i++) {
+		printf("%s/%d, ", list_spe->tab_specialites[i].nom, list_spe->tab_specialites[i].cout_horaire);
+	}
+	printf("%s/%d\n", list_spe->tab_specialites[list_spe->nb_specialites - 1].nom, list_spe->tab_specialites[list_spe->nb_specialites - 1].cout_horaire);
 }
 
-void traite_embauche() {
-	Mot nom_travailleur;
-	Mot nom_specialite;
-	get_id(nom_travailleur);
-	get_id(nom_specialite);
-	printf(MSG_EMBAUCHE, nom_travailleur, nom_specialite);
+Travailleurs traite_embauche() {
+	Travailleurs Worker;
+	get_id(Worker.tab_travailleurs->nom);
+	get_id(Worker.tab_travailleurs->tags_competences);
+	return Worker;
 }
-void traite_demarche() {
-	Mot nom_client;
-	get_id(nom_client);
-	printf(MSG_DEMARCHE, nom_client);
+Clients traite_demarche() {
+	Clients Customer;
+	get_id(Customer.tab_clients);
+	return Customer;
 }
 
 void traite_consultation_travailleurs() {
@@ -155,6 +159,8 @@ int main(int argc, char* argv[]) {
 		EchoActif = VRAI;
 	}
 	Mot buffer;
+	Specialites Spe;
+	Spe.nb_specialites = 0;
 	while (VRAI) {
 		get_id(buffer);
 		if (strcmp(buffer, "passe") == 0)
@@ -163,11 +169,11 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "developpe") == 0) {
-			traite_developpe();
+			traite_developpe(&Spe);
 			continue;
 		}
 		if (strcmp(buffer, "specialites") == 0) {
-			traite_specialites();
+			traite_specialites(&Spe);
 			continue;
 		}
 		if (strcmp(buffer, "embauche") == 0) {
