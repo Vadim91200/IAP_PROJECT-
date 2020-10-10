@@ -11,7 +11,7 @@ Booleen EchoActif = FAUX;
 #define MSG_INTERRUPTION "## fin de programme\n" 
 #define MSG_EMBAUCHE "## nouveau travailleur \"%s\" competent pour la specialite \"%s\"\n" 
 #define MSG_SPECIALITE "## consultation des specialites\n"
-#define MSG_CONSULTATION_TRAVAILLEURS "## consultation des travailleurs competents pour la specialite \"%s\"\n"
+#define MSG_CONSULTATION_TRAVAILLEURS "## la specialite \%s\ peut etre prise en charge par : "
 #define MSG_DEMARCHE "## nouveau client \"%s\"\n"
 #define MSG_CONSULTATION_COMMANDE "## consultation des commandes effectuees par \"%s\"\n"
 #define MSG_COMMANDE "## nouvelle commande \"%s\", par client \"%s\"\n"
@@ -39,29 +39,29 @@ int get_int() {
 // Donnees
 // specialites −−−−−−−−−−−−−−−−−−−−−
 #define MAX_SPECIALITES 10
-typedef struct{
-Mot nom;
-int cout_horaire;
+typedef struct {
+	Mot nom;
+	int cout_horaire;
 } Specialite;
-typedef struct{
-Specialite tab_specialites[MAX_SPECIALITES];
-unsigned int nb_specialites;
+typedef struct {
+	Specialite tab_specialites[MAX_SPECIALITES];
+	unsigned int nb_specialites;
 } Specialites;
 // travailleurs −−−−−−−−−−−−−−−−−−−−
 #define MAX_TRAVAILLEURS 50
-typedef struct{
-Mot nom;
-Booleen tags_competences[MAX_SPECIALITES];
+typedef struct {
+	Mot nom;
+	Booleen tags_competences[MAX_SPECIALITES];
 } Travailleur;
-typedef struct{
-Travailleur tab_travailleurs[MAX_TRAVAILLEURS];
-unsigned int nb_travailleurs;
+typedef struct {
+	Travailleur tab_travailleurs[MAX_TRAVAILLEURS];
+	unsigned int nb_travailleurs;
 } Travailleurs;
 // client −−−−−−−−−−−−−−−−−−−−−−−−−−
 #define MAX_CLIENTS 10
-typedef struct{
-Mot tab_clients[MAX_CLIENTS];
-unsigned int nb_clients;
+typedef struct {
+	Mot tab_clients[MAX_CLIENTS];
+	unsigned int nb_clients;
 } Clients;
 // Instructions --------------------------------------------------------------- 
 // developpe --------------------------- 
@@ -74,17 +74,16 @@ void traite_developpe(Specialites* Spe) {
 void traite_specialites(Specialites* list_spe) {
 	unsigned int i;
 	printf("specialites traitees : ");
-	for (i = 0; i < list_spe->nb_specialites-1; i++) {
+	for (i = 0; i < list_spe->nb_specialites - 1; i++) {
 		printf("%s/%d, ", list_spe->tab_specialites[i].nom, list_spe->tab_specialites[i].cout_horaire);
 	}
 	printf("%s/%d\n", list_spe->tab_specialites[list_spe->nb_specialites - 1].nom, list_spe->tab_specialites[list_spe->nb_specialites - 1].cout_horaire);
 }
 
-Travailleurs traite_embauche() {
-	Travailleurs Worker;
-	get_id(Worker.tab_travailleurs->nom);
-	get_id(Worker.tab_travailleurs->tags_competences);
-	return Worker;
+void traite_embauche(Travailleurs* Worker) {
+	get_id(Worker->tab_travailleurs[Worker->nb_travailleurs].nom);
+	get_id(Worker->tab_travailleurs[Worker->nb_travailleurs].tags_competences);
+	Worker->nb_travailleurs += 1;
 }
 Clients traite_demarche() {
 	Clients Customer;
@@ -92,15 +91,24 @@ Clients traite_demarche() {
 	return Customer;
 }
 
-void traite_consultation_travailleurs() {
+void traite_consultation_travailleurs(Travailleurs* list_worker) {
+	unsigned int i;
 	Mot nom_specialite;
 	get_id(nom_specialite);
 	if (strcmp(nom_specialite, "tous") == 0)
 	{
-		printf(MSG_SPECIALITE_TOUS, nom_specialite, nom_specialite);
+		for (i = 0; i < list_worker->nb_travailleurs; i++) {
+			printf(MSG_CONSULTATION_TRAVAILLEURS "%s\n", list_worker->tab_travailleurs[i].tags_competences, list_worker->tab_travailleurs[i].nom);
+		}
 	}
 	else {
 		printf(MSG_CONSULTATION_TRAVAILLEURS, nom_specialite);
+		for (i = 0; i < list_worker->nb_travailleurs; i++) {
+			if (strcmp(nom_specialite, list_worker->tab_travailleurs[i].tags_competences) == 0) {
+				printf("%s\n", list_worker->tab_travailleurs[i].nom);
+			}
+		}
+
 	}
 }
 void traite_consultation_commandes() {
@@ -161,6 +169,8 @@ int main(int argc, char* argv[]) {
 	Mot buffer;
 	Specialites Spe;
 	Spe.nb_specialites = 0;
+	Travailleurs Worker;
+	Worker.nb_travailleurs = 0;
 	while (VRAI) {
 		get_id(buffer);
 		if (strcmp(buffer, "passe") == 0)
@@ -177,7 +187,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "embauche") == 0) {
-			traite_embauche();
+			traite_embauche(&Worker);
 			continue;
 		}
 		if (strcmp(buffer, "demarche") == 0) {
@@ -185,7 +195,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "travailleurs") == 0) {
-			traite_consultation_travailleurs();
+			traite_consultation_travailleurs(&Worker);
 			continue;
 		}
 		if (strcmp(buffer, "client") == 0) {
