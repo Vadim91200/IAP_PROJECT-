@@ -90,38 +90,53 @@ void traite_specialites(Specialites* liste_spe) {
 }
 
 //nouveau travailleurs-----------------
-void traite_embauche(Travailleurs* Worker) {
+void traite_embauche(Travailleurs* Worker, Specialites* specialites) {
 	Mot nom_travailleur;
 	get_id(nom_travailleur);
+	Mot nom_specialite;
+	get_id(nom_specialite);
 	unsigned int i;
 	unsigned int dejarencontre = 0;
+	unsigned int indice;
+	for (indice = 0; indice < specialites->nb_specialites; indice++)
+	{
+		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+		{
+			break;
+
+
+		}
+	}
+
 	for (i = 0; i < Worker->nb_travailleurs; i++) {
 		if (Worker->nb_travailleurs == 0) {
 			break;
 		}
 		else if (strcmp(nom_travailleur, Worker->tab_travailleurs[i].nom) == 0) {
-			unsigned int k;
-			for (k = 0; k < 10; k++) {
-				Worker->tab_travailleurs[i].tags_competences[k]
-			}
+
+
+			Worker->tab_travailleurs[i].tags_competences[indice] = VRAI;
+
+
 			dejarencontre = 1;
 			break;
+
 		}
 		else
 		{
 			continue;
 		}
+
+
 	}
-	if (dejarencontre == 1){
-	
-	}
-	else
+	if (dejarencontre == 0)
 	{
-		strcpy(Worker->tab_travailleurs[i].nom, nom_travailleur);
-		get_id(Worker->tab_travailleurs[i].tags_competences);
+		Travailleur travailleur;
+		strcpy(travailleur.nom, nom_travailleur);
+		travailleur.tags_competences[indice] = VRAI;
+		Worker->tab_travailleurs[Worker->nb_travailleurs] = travailleur;
 		Worker->nb_travailleurs += 1;
 	}
-	
 }
 //nouveau client----------------
 void traite_demarche(Clients* Customer) {
@@ -129,8 +144,8 @@ void traite_demarche(Clients* Customer) {
 	Customer->nb_clients += 1;
 }
 // Consultation travailleurs---------------------- (test a ne pas calculer)
-void traite_consultation_travailleurs(Travailleurs* list_worker) {
-	unsigned int i;
+void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites) {
+	unsigned int i, indice;
 	Mot nom_specialite;
 	get_id(nom_specialite);
 	if (strcmp(nom_specialite, "tous") == 0)
@@ -141,12 +156,18 @@ void traite_consultation_travailleurs(Travailleurs* list_worker) {
 	}
 	else {
 		printf(MSG_CONSULTATION_TRAVAILLEURS, nom_specialite);
-		for (i = 0; i <= list_worker->nb_travailleurs-1; i++) {
-			if (strcmp(nom_specialite, list_worker->tab_travailleurs[i].tags_competences) == 0){
+		for (indice = 0; indice < 10; indice++) {
+			if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+			{
+				break;
+			}
+		}
+		for (i = 0; i < list_worker->nb_travailleurs-1; i++) {
+			if (list_worker->tab_travailleurs[i].tags_competences[indice] == VRAI) {
 				printf("%s,", list_worker->tab_travailleurs[i].nom);
 			}
 		}
-		printf("%s\n", list_worker->tab_travailleurs[list_worker->nb_travailleurs].nom);
+		
 
 	}
 }
@@ -238,7 +259,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "embauche") == 0) {
-			traite_embauche(&Worker);
+			traite_embauche(&Worker, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "demarche") == 0) {
@@ -246,7 +267,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "travailleurs") == 0) {
-			traite_consultation_travailleurs(&Worker);
+			traite_consultation_travailleurs(&Worker, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "client") == 0) {
