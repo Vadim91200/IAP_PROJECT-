@@ -45,7 +45,7 @@ typedef struct specialite {
 } Specialite;
 typedef struct specialites {
 	Specialite tab_specialites[MAX_SPECIALITES];
-	unsigned int nb_specialites; 
+	unsigned int nb_specialites;
 } Specialites;
 
 // travailleurs −−−−−−−−−−−−−−−−−−−−
@@ -68,20 +68,21 @@ typedef struct {
 	Client tab_clients[MAX_CLIENTS];
 	unsigned int nb_clients;
 } Clients;
+
 // commandes −−−−−−−−−−−−−−−−−−−−−−−
 #define MAX_COMMANDES 500
-typedef struct{
-unsigned int nb_heures_requises;
-unsigned int nb_heures_effectuees;
+typedef struct {
+	unsigned int nb_heures_requises;
+	unsigned int nb_heures_effectuees;
 } Tache;
-typedef struct{
-Mot nom;
-unsigned int idx_client;
-Tache taches_par_specialite[MAX_SPECIALITES]; // nb_heures_requi ses==0 <=> pas de tache pour c e t t e s p e c i a l i t e
+typedef struct {
+	Mot nom;
+	unsigned int idx_client;
+	Tache taches_par_specialite[MAX_SPECIALITES]; // nb_heures_requi ses==0 <=> pas de tache pour c e t t e s p e c i a l i t e
 } Commande;
-typedef struct{
-Commande tab_commandes[MAX_COMMANDES];
-unsigned int nb_commandes;
+typedef struct {
+	Commande tab_commandes[MAX_COMMANDES];
+	unsigned int nb_commandes;
 } Commandes;
 
 // Instructions --------------------------------------------------------------- 
@@ -104,18 +105,27 @@ void traite_specialites(Specialites* liste_spe) {
 }
 
 //nouveau travailleurs-----------------
-void traite_embauche(Travailleurs* Worker) {
+void traite_embauche(Travailleurs* Worker, Specialites* specialites) {
 	Mot nom_travailleur;
 	get_id(nom_travailleur);
+	Mot nom_specialite;
+	get_id(nom_specialite);
 	unsigned int i;
 	unsigned int dejarencontre = 0;
+	unsigned int indice;
+	for (indice = 0; indice < specialites->nb_specialites; indice++)
+	{
+		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+		{
+			break;
+		}
+	}
 	for (i = 0; i < Worker->nb_travailleurs; i++) {
 		if (Worker->nb_travailleurs == 0) {
 			break;
 		}
 		else if (strcmp(nom_travailleur, Worker->tab_travailleurs[i].nom) == 0) {
-			unsigned int k;
-			get_id(Worker->tab_travailleurs[i].tags_competences);;
+			Worker->tab_travailleurs[i].tags_competences[indice] = VRAI;
 			dejarencontre = 1;
 			break;
 		}
@@ -124,45 +134,71 @@ void traite_embauche(Travailleurs* Worker) {
 			continue;
 		}
 	}
-	if (dejarencontre == 1){
-	
-	}
-	else
+	if (dejarencontre == 0)
 	{
-		strcpy(Worker->tab_travailleurs[i].nom, nom_travailleur);
-		get_id(Worker->tab_travailleurs[i].tags_competences);
+		Travailleur travailleur;
+		strcpy(travailleur.nom, nom_travailleur);
+		travailleur.tags_competences[indice] = VRAI;
+		Worker->tab_travailleurs[Worker->nb_travailleurs] = travailleur;
 		Worker->nb_travailleurs += 1;
 	}
-	
 }
 //nouveau client----------------
 void traite_demarche(Clients* Customer) {
 	get_id(Customer->tab_clients[Customer->nb_clients].nom); //enregistre les clients
 	Customer->nb_clients += 1;
 }
-// Consultation travailleurs---------------------- (test a ne pas calculer)
-void traite_consultation_travailleurs(Travailleurs* list_worker) {
-	unsigned int i;
+// Consultation travailleurs---------------------- 
+void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites) {
+	unsigned int i, indice;
 	Mot nom_specialite;
 	get_id(nom_specialite);
+	Booleen bool= FAUX;
 	if (strcmp(nom_specialite, "tous") == 0)
 	{
 		for (i = 0; i < list_worker->nb_travailleurs; i++) {
-			printf("la specialite %s peut etre prise en charge par : %s \n", list_worker->tab_travailleurs[i].tags_competences, list_worker->tab_travailleurs[i].nom);
+			printf(MSG_CONSULTATION_TRAVAILLEURS, specialites->tab_specialites[i].nom);
+
+			for (indice = 0; indice < list_worker->nb_travailleurs; indice++) {
+				if (list_worker->tab_travailleurs[indice].tags_competences[i] == VRAI) {
+					if (bool == FAUX) {
+						printf("%s", list_worker->tab_travailleurs[indice].nom);
+						bool = VRAI;
+					}
+					else
+					{
+						printf(", %s", list_worker->tab_travailleurs[indice].nom);
+					}
+				}
+			}
+			printf("\n");
+			bool = FAUX;
 		}
 	}
 	else {
 		printf(MSG_CONSULTATION_TRAVAILLEURS, nom_specialite);
-		for (i = 0; i <= 10; i++) {
-			if (strcmp("reseau", list_worker->tab_travailleurs[i].tags_competences) == 0){
-				printf("%s,", list_worker->tab_travailleurs[0].nom);
+		for (indice = 0; indice < 10; indice++) {
+			if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+			{
+				break;
 			}
 		}
-		//printf("%s\n", list_worker->tab_travailleurs[list_worker->nb_travailleurs].nom);
+		for (i = 0; i < list_worker->nb_travailleurs; i++) {
+			if (list_worker->tab_travailleurs[i].tags_competences[indice] == VRAI) {
+				if (bool == FAUX) {
+					printf("%s", list_worker->tab_travailleurs[i].nom);
+					bool = VRAI;
+				}
+				else
+				{
+					printf(", %s", list_worker->tab_travailleurs[i].nom);
+				}
+			}
+		}
+		printf("\n");
 
 	}
 }
-
 // Consultation commandes----------------
 void traite_consultation_commandes(Clients* liste_customer) {
 	Mot nom_client;
@@ -181,12 +217,16 @@ void traite_consultation_commandes(Clients* liste_customer) {
 	}
 }
 //Nouvelle commande----------------
-void traite_nouvelle_commande() {
-	Mot nom_commande;
+void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 	Mot nom_client;
-	get_id(nom_commande);
+	unsigned int i;
+	get_id(Order->tab_commandes[Order->nb_commandes].nom);
+	Order->nb_commandes += 1;
 	get_id(nom_client);
-	printf(MSG_COMMANDE, nom_commande, nom_client);
+	for (i = 0; i < customer->nb_clients; i++) {
+		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
+			Order->tab_commandes[Order->nb_commandes].idx_client=i;
+	}
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision() {
@@ -198,8 +238,8 @@ void traite_tache(Tache* task) {
 	Mot nom_specialite;
 	get_id(nom_commande);
 	get_id(nom_specialite);
-	int nombres_d_heures = get_int();
-	printf(MSG_TACHE, nom_commande, nom_specialite, nombres_d_heures);
+	task->nb_heures_requises = get_int();
+	printf(MSG_TACHE, nom_commande, nom_specialite, task->nb_heures_requises);
 }
 void traite_charge() {
 	Mot nom_travailleur;
@@ -207,14 +247,13 @@ void traite_charge() {
 	printf(MSG_CHARGE, nom_travailleur);
 
 }
-void traite_progression() {
+void traite_progression(Tache* task_progress) {
 	Mot nom_commande;
 	get_id(nom_commande);
 	Mot nom_specialte;
 	get_id(nom_specialte);
-	int heures;
-	heures = get_int();
-	printf(MSG_PROGRESSION, nom_commande, nom_specialte, heures);
+	task_progress->nb_heures_effectuees = get_int();
+	printf(MSG_PROGRESSION, nom_commande, nom_specialte, task_progress->nb_heures_effectuees);
 }
 // interruption ------------------------ 
 void traite_interruption() {
@@ -234,6 +273,9 @@ int main(int argc, char* argv[]) {
 	Worker.nb_travailleurs = 0;
 	Clients Customer;
 	Customer.nb_clients = 0;
+	Commandes Order;
+	Order.nb_commandes = 0;
+	Tache Task;
 	while (VRAI) {
 		get_id(buffer);
 		if (strcmp(buffer, "passe") == 0)
@@ -250,7 +292,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "embauche") == 0) {
-			traite_embauche(&Worker);
+			traite_embauche(&Worker, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "demarche") == 0) {
@@ -258,7 +300,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "travailleurs") == 0) {
-			traite_consultation_travailleurs(&Worker);
+			traite_consultation_travailleurs(&Worker, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "client") == 0) {
@@ -266,7 +308,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "commande") == 0) {
-			traite_nouvelle_commande();
+			traite_nouvelle_commande(&Order, &Customer);
 			continue;
 		}
 		if (strcmp(buffer, "supervision") == 0) {
@@ -278,11 +320,11 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "progression") == 0) {
-			traite_progression();
+			traite_progression(&Task);
 			continue;
 		}
 		if (strcmp(buffer, "tache") == 0) {
-			traite_tache();
+			traite_tache(&Task);
 			continue;
 		}
 		if (strcmp(buffer, "interruption") == 0) {
