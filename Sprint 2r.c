@@ -143,15 +143,22 @@ void traite_demarche(Clients* Customer) {
 	get_id(Customer->tab_clients[Customer->nb_clients].nom); //enregistre les clients
 	Customer->nb_clients += 1;
 }
-// Consultation travailleurs---------------------- (test a ne pas calculer)
+// Consultation travailleurs----------------------
 void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites) {
 	unsigned int i, indice;
 	Mot nom_specialite;
 	get_id(nom_specialite);
 	if (strcmp(nom_specialite, "tous") == 0)
 	{
-		for (i = 0; i < list_worker->nb_travailleurs; i++) {
-			printf("la specialite %s peut etre prise en charge par : %s \n", list_worker->tab_travailleurs[i].tags_competences, list_worker->tab_travailleurs[i].nom);
+		for (i = 0; i < list_worker->nb_travailleurs - 1; i++) {
+			printf(MSG_CONSULTATION_TRAVAILLEURS, specialites->tab_specialites[i].nom);
+
+			for (indice = 0; indice < list_worker->nb_travailleurs-1; indice++) {
+				if (list_worker->tab_travailleurs[indice].tags_competences[i] == VRAI) {
+					printf("%s,", list_worker->tab_travailleurs[indice].nom);
+				}
+			}
+			printf("%s\n", list_worker->tab_travailleurs[indice].nom);
 		}
 	}
 	else {
@@ -162,7 +169,7 @@ void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* sp
 				break;
 			}
 		}
-		for (i = 0; i < list_worker->nb_travailleurs-1; i++) {
+		for (i = 0; i < list_worker->nb_travailleurs; i++) {
 			if (list_worker->tab_travailleurs[i].tags_competences[indice] == VRAI) {
 				printf("%s,", list_worker->tab_travailleurs[i].nom);
 			}
