@@ -20,7 +20,7 @@ Booleen EchoActif = FAUX;
 #define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\" : \"%d\" heures de plus ont ete realisees\n"
 #define MSG_SPECIALITE_TOUS "## consultation des travailleurs competents pour chaque specialite\n"
 #define MSG_PROGGRESSION_PASSE "## une reallocation est requise\n"
-#define MSG_CONSULTATION_COMMANDE "le client \%s\ a commande : \n"
+#define MSG_CONSULTATION_COMMANDE "le client %s a commande : "
 // Lexemes -------------------------------------------------------------------- 
 #define LGMOT 35
 #define NBCHIFFREMAX 5 
@@ -35,7 +35,6 @@ int get_int() {
 	if (EchoActif) printf(">>echo %s\n", buffer);
 	return atoi(buffer);
 }
-
 //Donnees--------------------------------------------
 //specialites---------------------
 #define MAX_SPECIALITES 10
@@ -200,20 +199,38 @@ void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* sp
 	}
 }
 // Consultation commandes----------------
-void traite_consultation_commandes(Clients* liste_customer) {
+void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 	Mot nom_client;
 	get_id(nom_client);
 	unsigned int i;
+	int INDICE, cpt = 0;
 	if (strcmp(nom_client, "tous") == 0)
 	{
-		for (i = 0; i < liste_customer->nb_clients; i++)
-			printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[i].nom); //Permet d'afficher tous les clients enregistres dans la base
+		for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
+			if (Order->tab_commandes[INDICE].idx_client == INDICE) {
+				printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
+				printf("%s\n", Order->tab_commandes[INDICE].nom);
+			}
+			else if(Order->nb_commandes < liste_customer->nb_clients){
+				printf(MSG_CONSULTATION_COMMANDE"\n", liste_customer->tab_clients[INDICE].nom);
+			}
+				
+		}		
 	}
 	else {
-		for (i = 0; i < liste_customer->nb_clients; i++)
-			if (strcmp(nom_client, liste_customer->tab_clients[i].nom) == 0) {
-				printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[i].nom);
+			for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
+				if (strcmp(nom_client, liste_customer->tab_clients[INDICE].nom) == 0) {
+					if (Order->tab_commandes[INDICE].idx_client == INDICE) {
+						printf(MSG_CONSULTATION_COMMANDE, nom_client);
+						printf("%s\n", Order->tab_commandes[INDICE].nom);
+						cpt = 1;
+						break;
+					}
+				}
 			}
+		if (cpt == 0) {
+			printf(MSG_CONSULTATION_COMMANDE"\n", nom_client);
+		}
 	}
 }
 //Nouvelle commande----------------
@@ -221,12 +238,12 @@ void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 	Mot nom_client;
 	unsigned int i;
 	get_id(Order->tab_commandes[Order->nb_commandes].nom);
-	Order->nb_commandes += 1;
 	get_id(nom_client);
 	for (i = 0; i < customer->nb_clients; i++) {
 		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
-			Order->tab_commandes[Order->nb_commandes].idx_client=i;
+			Order->tab_commandes[Order->nb_commandes].idx_client = i;
 	}
+	Order->nb_commandes += 1;
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision() {
@@ -253,7 +270,6 @@ void traite_progression(Tache* task_progress) {
 	Mot nom_specialte;
 	get_id(nom_specialte);
 	task_progress->nb_heures_effectuees = get_int();
-	printf(MSG_PROGRESSION, nom_commande, nom_specialte, task_progress->nb_heures_effectuees);
 }
 // interruption ------------------------ 
 void traite_interruption() {
@@ -304,7 +320,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "client") == 0) {
-			traite_consultation_commandes(&Customer);
+			traite_consultation_commandes(&Customer, &Order);
 			continue;
 		}
 		if (strcmp(buffer, "commande") == 0) {
