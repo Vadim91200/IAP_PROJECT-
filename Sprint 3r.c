@@ -246,8 +246,13 @@ void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 	Order->nb_commandes += 1;
 }
 // Consultation de l'avancement des commandes-------------------
-void traite_supervision() {
-	printf(MSG_SUPERVISION);
+void traite_supervision(Commandes* Order, Specialites* specialites) {
+	unsigned int i;
+	for (i = 0; Order->nb_commandes; i++) {
+		printf(MSG_SUPERVISION, Order->tab_commandes.nom);
+		if (Order->tab_commandes.taches_par_specialite[i])
+			printf("%s:%d/%d", specialites->tab_specialites[i].nom, Order->tab_commandes->taches_par_specialite->nb_heures_effectuees, Order->tab_commandes->taches_par_specialite->nb_heures_requises);
+	}
 }
 
 void traite_tache(Tache* task) {
@@ -328,7 +333,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "supervision") == 0) {
-			traite_supervision();
+			traite_supervision(&Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "charge") == 0) {
