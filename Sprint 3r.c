@@ -255,13 +255,29 @@ void traite_supervision(Commandes* Order, Specialites* specialites) {
 	}
 }
 
-void traite_tache(Tache* task) {
+void traite_tache(Tache* task, Commandes*commande,Specialites *specialites) {
 	Mot nom_commande;
 	Mot nom_specialite;
-	get_id(nom_commande);
-	get_id(nom_specialite);
+	int heures;
+	unsigned int i;
+	unsigned int y;
+	for (y = 0; y < commande->nb_commandes; y++)
+	{
+		if (strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
+			commande->tab_commandes[commande->nb_commandes].taches_par_specialite;
+ }
+	
+	}
+	for (i = 0; i < specialites->nb_specialites; i++)
+	{
+		if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0)
+		{
+			break;
+		}
+	}
+
 	task->nb_heures_requises = get_int();
-	printf(MSG_TACHE, nom_commande, nom_specialite, task->nb_heures_requises);
+
 }
 void traite_charge() {
 	Mot nom_travailleur;
