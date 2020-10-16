@@ -14,7 +14,7 @@ Booleen EchoActif = FAUX;
 #define MSG_CONSULTATION_TRAVAILLEURS "la specialite \%s\ peut etre prise en charge par : "
 #define MSG_COMMANDE "## nouvelle commande \"%s\", par client \"%s\"\n"
 #define MSG_DEMARCHE "## nouveau client \"%s\"\n"
-#define MSG_SUPERVISION "## consultation de l'avancement des commandes\n"
+#define MSG_SUPERVISION "etat des taches pour %s :\n"
 #define MSG_TACHE "## la commande \"%s\" requiere la specialite \"%s\" (nombre d'heures \"%d\")\n"
 #define MSG_CHARGE "## consultation de la charge de travail de \"%s\"\n"
 #define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\" : \"%d\" heures de plus ont ete realisees\n"
@@ -243,41 +243,39 @@ void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
 			Order->tab_commandes[Order->nb_commandes].idx_client = i;
 	}
+	Order->tab_commandes[Order->nb_commandes].taches_par_specialite[Order->nb_commandes].nb_heures_requises = 0;
+	Order->tab_commandes[Order->nb_commandes].taches_par_specialite[Order->nb_commandes].nb_heures_effectuees = 0;
 	Order->nb_commandes += 1;
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision(Commandes* Order, Specialites* specialites) {
-	unsigned int i;
-	for (i = 0; Order->nb_commandes; i++) {
-		printf(MSG_SUPERVISION, Order->tab_commandes.nom);
-		if (Order->tab_commandes.taches_par_specialite[i])
-			printf("%s:%d/%d", specialites->tab_specialites[i].nom, Order->tab_commandes->taches_par_specialite->nb_heures_effectuees, Order->tab_commandes->taches_par_specialite->nb_heures_requises);
+	unsigned int i, y;
+	for (i = 0; i < specialites->nb_specialites; i++) {
+		for (y = 0; y < Order->nb_commandes; y++) {
+			if (Order->nb_commandes != 0) {
+				printf(MSG_SUPERVISION, Order->tab_commandes->nom);
+				if (Order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
+					printf("%s:%d/%d\n", specialites->tab_specialites[i].nom, Order->tab_commandes->taches_par_specialite->nb_heures_effectuees, Order->tab_commandes->taches_par_specialite->nb_heures_requises);
+				}
+			}
+		}
 	}
 }
 
-void traite_tache(Tache* task, Commandes*commande,Specialites *specialites) {
+void traite_tache(Tache* task, Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
 	Mot nom_specialite;
-	int heures;
+	get_id(nom_commande);
+	get_id(nom_specialite);
 	unsigned int i;
 	unsigned int y;
-	for (y = 0; y < commande->nb_commandes; y++)
-	{
-		if (strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
-			commande->tab_commandes[commande->nb_commandes].taches_par_specialite;
- }
-	
-	}
-	for (i = 0; i < specialites->nb_specialites; i++)
-	{
-		if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0)
-		{
-			break;
+	for (i = 0; i < specialites->nb_specialites; i++){
+		for (y = 0; y < commande->nb_commandes; y++) {
+			if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0 && strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
+				commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises = get_int();
+			}	
 		}
 	}
-
-	task->nb_heures_requises = get_int();
-
 }
 void traite_charge() {
 	Mot nom_travailleur;
@@ -361,7 +359,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "tache") == 0) {
-			traite_tache(&Task);
+			traite_tache(&Task, &Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "interruption") == 0) {
