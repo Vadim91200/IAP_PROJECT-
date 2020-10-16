@@ -234,7 +234,7 @@ void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 	}
 }
 //Nouvelle commande----------------
-void traite_nouvelle_commande(Commandes* Order, Clients* customer, Specialites* specialite) {
+void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 	Mot nom_client;
 	unsigned int i,y;
 	get_id(Order->tab_commandes[Order->nb_commandes].nom);
@@ -243,25 +243,47 @@ void traite_nouvelle_commande(Commandes* Order, Clients* customer, Specialites* 
 		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
 			Order->tab_commandes[Order->nb_commandes].idx_client = i;
 	}
-	for (y = 0; y < specialite->nb_specialites; y++) {
+	for (y = 0; y < MAX_SPECIALITES; y++) {
 		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_requises = 0;
 		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_effectuees = 0;
 	}
-	Order->nb_commandes += 1;
+	Order->nb_commandes++;
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision(Commandes* Order, Specialites* specialites) {
-	unsigned int i;
-		for (i = 0; i < Order->nb_commandes; i++) {
-			if (Order->nb_commandes != 0) {
-				printf(MSG_SUPERVISION, Order->tab_commandes->nom);
-					printf("%s:%d/%d\n", specialites->tab_specialites[i].nom, Order->tab_commandes->taches_par_specialite->nb_heures_effectuees, Order->tab_commandes->taches_par_specialite->nb_heures_requises);
-				
+	unsigned int i,y;
+	Booleen bool = FAUX;
+	for (i = 0; i < Order->nb_commandes; i++) {
+		if (Order->nb_commandes != 0) {
+			printf(MSG_SUPERVISION, Order->tab_commandes[i].nom);
+			for (y = 0; y < specialites->nb_specialites; y++) {
+				if (Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises != 0) {
+					if (bool == FAUX) {
+						printf(" %s:%d/%d", specialites->tab_specialites[i].nom,
+							Order->tab_commandes->taches_par_specialite->nb_heures_effectuees,
+							Order->tab_commandes->taches_par_specialite->nb_heures_requises);
+						bool = VRAI;
+					}
+					else
+					{
+						printf(", %s:%d/%d", specialites->tab_specialites[i].nom,
+							Order->tab_commandes->taches_par_specialite[y].nb_heures_effectuees,
+							Order->tab_commandes->taches_par_specialite[y].nb_heures_requises);
+					}
+					
+				}
+				else
+				{
+					printf("\n");
+				}
 			}
+			printf("\n");
+			bool = FAUX;
 		}
+	}
 }
 
-void traite_tache(Tache* task, Commandes* commande, Specialites* specialites) {
+void traite_tache(Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
 	get_id(nom_commande);
 	Mot nom_specialite;
@@ -272,6 +294,7 @@ void traite_tache(Tache* task, Commandes* commande, Specialites* specialites) {
 		for (y = 0; y < commande->nb_commandes; y++) {
 			if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0 && strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
 				commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises = get_int();
+				break;
 			}	
 		}
 	}
@@ -282,7 +305,7 @@ void traite_charge() {
 	printf(MSG_CHARGE, nom_travailleur);
 
 }
-void traite_progression(Tache* task, Commandes* commande, Specialites* specialites) {
+void traite_progression(Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
 	get_id(nom_commande);
 	Mot nom_specialite;
@@ -293,6 +316,7 @@ void traite_progression(Tache* task, Commandes* commande, Specialites* specialit
 		for (y = 0; y < commande->nb_commandes; y++) {
 			if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0 && strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
 				commande->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees = get_int();
+				break;
 			}
 		}
 	}
@@ -317,7 +341,6 @@ int main(int argc, char* argv[]) {
 	Customer.nb_clients = 0;
 	Commandes Order;
 	Order.nb_commandes = 0;
-	Tache Task;
 	while (VRAI) {
 		get_id(buffer);
 		if (strcmp(buffer, "passe") == 0)
@@ -350,7 +373,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "commande") == 0) {
-			traite_nouvelle_commande(&Order, &Customer, &Spe);
+			traite_nouvelle_commande(&Order, &Customer);
 			continue;
 		}
 		if (strcmp(buffer, "supervision") == 0) {
@@ -362,11 +385,11 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "progression") == 0) {
-			traite_progression(&Task, &Order, &Spe);
+			traite_progression(&Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "tache") == 0) {
-			traite_tache(&Task, &Order, &Spe);
+			traite_tache(&Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "interruption") == 0) {
