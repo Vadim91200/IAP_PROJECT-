@@ -14,7 +14,7 @@ Booleen EchoActif = FAUX;
 #define MSG_CONSULTATION_TRAVAILLEURS "la specialite \%s\ peut etre prise en charge par : "
 #define MSG_COMMANDE "## nouvelle commande \"%s\", par client \"%s\"\n"
 #define MSG_DEMARCHE "## nouveau client \"%s\"\n"
-#define MSG_SUPERVISION "etat des taches pour %s :\n"
+#define MSG_SUPERVISION "etat des taches pour %s :"
 #define MSG_TACHE "## la commande \"%s\" requiere la specialite \"%s\" (nombre d'heures \"%d\")\n"
 #define MSG_CHARGE "## consultation de la charge de travail de \"%s\"\n"
 #define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\" : \"%d\" heures de plus ont ete realisees\n"
@@ -234,38 +234,37 @@ void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 	}
 }
 //Nouvelle commande----------------
-void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
+void traite_nouvelle_commande(Commandes* Order, Clients* customer, Specialites* specialite) {
 	Mot nom_client;
-	unsigned int i;
+	unsigned int i,y;
 	get_id(Order->tab_commandes[Order->nb_commandes].nom);
 	get_id(nom_client);
 	for (i = 0; i < customer->nb_clients; i++) {
 		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
 			Order->tab_commandes[Order->nb_commandes].idx_client = i;
 	}
-	Order->tab_commandes[Order->nb_commandes].taches_par_specialite[Order->nb_commandes].nb_heures_requises = 0;
-	Order->tab_commandes[Order->nb_commandes].taches_par_specialite[Order->nb_commandes].nb_heures_effectuees = 0;
+	for (y = 0; y < specialite->nb_specialites; y++) {
+		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_requises = 0;
+		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_effectuees = 0;
+	}
 	Order->nb_commandes += 1;
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision(Commandes* Order, Specialites* specialites) {
-	unsigned int i, y;
-	for (i = 0; i < specialites->nb_specialites; i++) {
-		for (y = 0; y < Order->nb_commandes; y++) {
+	unsigned int i;
+		for (i = 0; i < Order->nb_commandes; i++) {
 			if (Order->nb_commandes != 0) {
 				printf(MSG_SUPERVISION, Order->tab_commandes->nom);
-				if (Order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
 					printf("%s:%d/%d\n", specialites->tab_specialites[i].nom, Order->tab_commandes->taches_par_specialite->nb_heures_effectuees, Order->tab_commandes->taches_par_specialite->nb_heures_requises);
-				}
+				
 			}
 		}
-	}
 }
 
 void traite_tache(Tache* task, Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
-	Mot nom_specialite;
 	get_id(nom_commande);
+	Mot nom_specialite;
 	get_id(nom_specialite);
 	unsigned int i;
 	unsigned int y;
@@ -283,12 +282,20 @@ void traite_charge() {
 	printf(MSG_CHARGE, nom_travailleur);
 
 }
-void traite_progression(Tache* task_progress) {
+void traite_progression(Tache* task, Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
 	get_id(nom_commande);
-	Mot nom_specialte;
-	get_id(nom_specialte);
-	task_progress->nb_heures_effectuees = get_int();
+	Mot nom_specialite;
+	get_id(nom_specialite);
+	unsigned int i;
+	unsigned int y;
+	for (i = 0; i < specialites->nb_specialites; i++) {
+		for (y = 0; y < commande->nb_commandes; y++) {
+			if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0 && strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
+				commande->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees = get_int();
+			}
+		}
+	}
 }
 // interruption ------------------------ 
 void traite_interruption() {
@@ -343,7 +350,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "commande") == 0) {
-			traite_nouvelle_commande(&Order, &Customer);
+			traite_nouvelle_commande(&Order, &Customer, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "supervision") == 0) {
@@ -355,7 +362,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "progression") == 0) {
-			traite_progression(&Task);
+			traite_progression(&Task, &Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "tache") == 0) {
