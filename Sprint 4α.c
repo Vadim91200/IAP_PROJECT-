@@ -140,7 +140,6 @@ void traite_embauche(Travailleurs* Worker, Specialites* specialites) {
 		strcpy(travailleur.nom, nom_travailleur);
 		travailleur.tags_competences[indice] = VRAI;
 		Worker->tab_travailleurs[Worker->nb_travailleurs] = travailleur;
-		Worker->tab_travailleurs[Worker->nb_travailleurs].idx_travailleur = 0;
 		Worker->nb_travailleurs += 1;
 	}
 }
@@ -315,19 +314,7 @@ void traite_tache(Commandes* commande, Specialites* specialites, Travailleurs* w
 	}
 	for (k = 0; k < worker->nb_travailleurs; k++) {
 		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) {
-			if (worker->tab_travailleurs[k + 1].tags_competences[indice] == VRAI) {
-				if (worker->tab_travailleurs[k].idx_travailleur < worker->tab_travailleurs[k + 1].idx_travailleur) {
-					worker->tab_travailleurs[k].idx_travailleur++;
-				}
-				else
-				{
-					worker->tab_travailleurs[k + 1].idx_travailleur++;
-				}
-			}
-			else
-			{
-				worker->tab_travailleurs[k].idx_travailleur++;
-			}
+			worker->tab_travailleurs[k].idx_travailleur = k;
 			break;
 		}
 	}
@@ -345,7 +332,7 @@ void traite_charge(Travailleurs* worker, Commandes* order, Specialites* speciali
 				}
 				for (k = 0; k < worker->nb_travailleurs; k++) {
 					if (strcmp(nom_travailleur, worker->tab_travailleurs[k].nom) == 0) {
-						if (worker->tab_travailleurs[k].idx_travailleur != 0) {
+						if (worker->tab_travailleurs[k].idx_travailleur == k) {
 							if (bool == FAUX) {
 								printf("%s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
 									(order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
