@@ -16,7 +16,7 @@ Booleen EchoActif = FAUX;
 #define MSG_DEMARCHE "## nouveau client \"%s\"\n"
 #define MSG_SUPERVISION "etat des taches pour %s : "
 #define MSG_TACHE "## la commande \"%s\" requiere la specialite \"%s\" (nombre d'heures \"%d\")\n"
-#define MSG_CHARGE "## consultation de la charge de travail de \"%s\"\n"
+#define MSG_CHARGE "charge de travail pour \%s\ : "
 #define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\" : \"%d\" heures de plus ont ete realisees\n"
 #define MSG_SPECIALITE_TOUS "## consultation des travailleurs competents pour chaque specialite\n"
 #define MSG_PROGGRESSION_PASSE "## une reallocation est requise\n"
@@ -52,6 +52,7 @@ typedef struct specialites {
 typedef struct {
 	Mot nom;
 	Booleen tags_competences[MAX_SPECIALITES];
+	unsigned int idx_travailleur;
 } Travailleur;
 typedef struct {
 	Travailleur tab_travailleurs[MAX_TRAVAILLEURS];
@@ -152,7 +153,7 @@ void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* sp
 	unsigned int i, indice;
 	Mot nom_specialite;
 	get_id(nom_specialite);
-	Booleen bool= FAUX;
+	Booleen bool = FAUX;
 	if (strcmp(nom_specialite, "tous") == 0)
 	{
 		for (i = 0; i < list_worker->nb_travailleurs; i++) {
@@ -204,30 +205,41 @@ void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 	get_id(nom_client);
 	unsigned int i;
 	int INDICE, cpt = 0;
+	Booleen bool = FAUX;
 	if (strcmp(nom_client, "tous") == 0)
 	{
 		for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
 			if (Order->tab_commandes[INDICE].idx_client == INDICE) {
-				printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
-				printf("%s\n", Order->tab_commandes[INDICE].nom);
-			}
-			else if(Order->nb_commandes < liste_customer->nb_clients){
-				printf(MSG_CONSULTATION_COMMANDE"\n", liste_customer->tab_clients[INDICE].nom);
-			}
-				
-		}		
-	}
-	else {
-			for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
-				if (strcmp(nom_client, liste_customer->tab_clients[INDICE].nom) == 0) {
-					if (Order->tab_commandes[INDICE].idx_client == INDICE) {
-						printf(MSG_CONSULTATION_COMMANDE, nom_client);
-						printf("%s\n", Order->tab_commandes[INDICE].nom);
-						cpt = 1;
-						break;
-					}
+				if (bool == FAUX) {
+					printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
+					printf("%s", Order->tab_commandes[INDICE].nom);
+					bool = VRAI;
+				}
+				else
+				{
+					printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
+					printf(", %s", Order->tab_commandes[INDICE].nom);
 				}
 			}
+			else if (Order->nb_commandes < liste_customer->nb_clients) {
+				printf(MSG_CONSULTATION_COMMANDE"\n", liste_customer->tab_clients[INDICE].nom);
+			}
+
+		}
+		printf("\n");
+		bool = FAUX;
+	}
+	else {
+		for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
+			if (strcmp(nom_client, liste_customer->tab_clients[INDICE].nom) == 0) {
+				if (Order->tab_commandes[INDICE].idx_client == INDICE) {
+					printf(MSG_CONSULTATION_COMMANDE, nom_client);
+					printf("%s\n", Order->tab_commandes[INDICE].nom);
+					cpt = 1;
+					break;
+				}
+			}
+		}
 		if (cpt == 0) {
 			printf(MSG_CONSULTATION_COMMANDE"\n", nom_client);
 		}
@@ -236,7 +248,7 @@ void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 //Nouvelle commande----------------
 void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 	Mot nom_client;
-	unsigned int i,y;
+	unsigned int i, y;
 	get_id(Order->tab_commandes[Order->nb_commandes].nom);
 	get_id(nom_client);
 	for (i = 0; i < customer->nb_clients; i++) {
@@ -251,7 +263,7 @@ void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
 }
 // Consultation de l'avancement des commandes-------------------
 void traite_supervision(Commandes* Order, Specialites* specialites) {
-	unsigned int i,y;
+	unsigned int i, y;
 	Booleen bool = FAUX;
 	for (i = 0; i < Order->nb_commandes; i++) {
 		if (Order->nb_commandes != 0) {
@@ -270,7 +282,7 @@ void traite_supervision(Commandes* Order, Specialites* specialites) {
 							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees,
 							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises);
 					}
-					
+
 				}
 			}
 			printf("\n");
@@ -279,27 +291,73 @@ void traite_supervision(Commandes* Order, Specialites* specialites) {
 	}
 }
 
-void traite_tache(Commandes* commande, Specialites* specialites) {
+void traite_tache(Commandes* commande, Specialites* specialites, Travailleurs* worker) {
 	Mot nom_commande;
 	get_id(nom_commande);
 	Mot nom_specialite;
 	get_id(nom_specialite);
-	unsigned int i;
-	unsigned int y;
-	for (i = 0; i < specialites->nb_specialites; i++){
+	unsigned int i, y, indice, k;
+	for (i = 0; i < specialites->nb_specialites; i++) {
 		for (y = 0; y < commande->nb_commandes; y++) {
 			if (strcmp(nom_specialite, specialites->tab_specialites[i].nom) == 0 && strcmp(nom_commande, commande->tab_commandes[y].nom) == 0) {
 				commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises = commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises + get_int();
 				break;
-			}	
+			}
+		}
+	}
+	for (indice = 0; indice < specialites->nb_specialites; indice++) {
+		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+		{
+			break;
+		}
+	}
+	for (k = 0; k < worker->nb_travailleurs; k++) {
+		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) {
+			worker->tab_travailleurs[k].idx_travailleur = k;
+			break;
 		}
 	}
 }
-void traite_charge() {
+void traite_charge(Travailleurs* worker, Commandes* order, Specialites* specialites) {
 	Mot nom_travailleur;
 	get_id(nom_travailleur);
-	printf(MSG_CHARGE, nom_travailleur);
-
+	unsigned int i, y, k,cpt=0;
+	Booleen bool = FAUX;
+	for (i = 0; i < order->nb_commandes; i++) {
+		for (y = 0; y < specialites->nb_specialites; y++) {
+			if (order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises != 0 && order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees != order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises) {
+				if (cpt == 0) {
+					printf(MSG_CHARGE, nom_travailleur);
+				}
+				for (k = 0; k < worker->nb_travailleurs; k++) {
+					if (strcmp(nom_travailleur, worker->tab_travailleurs[k].nom) == 0) {
+						if (worker->tab_travailleurs[k].idx_travailleur == k) {
+							if (bool == FAUX) {
+								printf("%s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
+									(order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
+										order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees));
+								bool = VRAI;
+								cpt = 1;
+							}
+							else
+							{
+								printf(", %s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
+									order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
+									order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees);
+							}
+						}
+						else
+						{
+							cpt = 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("\n");
+	bool = FAUX;
+	cpt = 0;
 }
 void traite_progression(Commandes* commande, Specialites* specialites) {
 	Mot nom_commande;
@@ -376,7 +434,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "charge") == 0) {
-			traite_charge();
+			traite_charge(&Worker, &Order, &Spe);
 			continue;
 		}
 		if (strcmp(buffer, "progression") == 0) {
@@ -384,7 +442,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "tache") == 0) {
-			traite_tache(&Order, &Spe);
+			traite_tache(&Order, &Spe, &Worker);
 			continue;
 		}
 		if (strcmp(buffer, "interruption") == 0) {
