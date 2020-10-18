@@ -208,26 +208,27 @@ void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
 	Booleen bool = FAUX;
 	if (strcmp(nom_client, "tous") == 0)
 	{
-		for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
-			if (Order->tab_commandes[INDICE].idx_client == INDICE) {
-				if (bool == FAUX) {
-					printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
-					printf("%s", Order->tab_commandes[INDICE].nom);
-					bool = VRAI;
-				}
-				else
-				{
-					printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[INDICE].nom);
-					printf(", %s", Order->tab_commandes[INDICE].nom);
+		for (i = 0; i < liste_customer->nb_clients; i++) {
+			if (cpt == 0) {
+				printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[i].nom);
+			}
+			for (INDICE = 0; INDICE < Order->nb_commandes; INDICE++) {
+				if (Order->tab_commandes[INDICE].idx_client == i) {
+					if (bool == FAUX) {
+						printf("%s", Order->tab_commandes[INDICE].nom);
+						bool = VRAI;
+						cpt = 1;
+					}
+					else
+					{
+						printf(", %s", Order->tab_commandes[INDICE].nom);
+					}
 				}
 			}
-			else if (Order->nb_commandes < liste_customer->nb_clients) {
-				printf(MSG_CONSULTATION_COMMANDE"\n", liste_customer->tab_clients[INDICE].nom);
-			}
-
+			printf("\n");
+			bool = FAUX;
+			cpt = 0;
 		}
-		printf("\n");
-		bool = FAUX;
 	}
 	else {
 		for (INDICE = 0; INDICE < liste_customer->nb_clients; INDICE++) {
