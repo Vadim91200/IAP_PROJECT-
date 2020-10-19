@@ -307,13 +307,13 @@ void traite_tache(Commandes* commande, Specialites* specialites, Travailleurs* w
 		}
 	}
 	for (indice = 0; indice < specialites->nb_specialites; indice++) {
-		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0) // sert a trouver l'indice qui correspond a la spécialité entré
 		{
 			break;
 		}
 	}
 	for (k = 0; k < worker->nb_travailleurs; k++) {
-		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) {
+		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) { //sert a affecté au premier travailleur compétent pour la spécialité la tache
 			worker->tab_travailleurs[k].idx_travailleur = k;
 			break;
 		}
