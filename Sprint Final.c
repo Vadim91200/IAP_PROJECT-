@@ -151,24 +151,30 @@ void traite_tache(Commandes* order, Specialites* specialites, Travailleurs* work
 *elle n'a pas de paramètre [Out] rien n'est retourné
 **/
 void traite_charge(Commandes* order, Specialites* specialites, Travailleurs* worker);
-
+/** brief
+*La fonction traite_facturation permet d'afectué la facturation de la commande lorsque celle ci est fini
+*elle prend en paramèter [In] l'entié non signé y
+*elle prend en paramètre [In]/[Out] le pointeur order qui est de type Commandes, le pointeur specialites qui est de type Specialites ainsi que le pointeur cutomer qui est de type Clients
+*elle n'a pas de paramètre [Out] rien n'est retourné
+**/
+void traite_facturation(Commandes* order, Specialites* specialites, Clients* customer, unsigned int y);
 // facturation La fonction est appelé a chaque progression de tache 
-void traite_facturation(Commandes* commande, Specialites* specialites, Clients* customer, unsigned int y) {
-	unsigned int i, INDICE, k, j, prix_par_client = 0, cpt = 0;
+void traite_facturation(Commandes* order, Specialites* specialites, Clients* customer, unsigned int y) {
+	unsigned int i, INDICE, k, j;
 	Booleen bool = FAUX;
-	printf(MSG_FACTURATION, commande->tab_commandes[y].nom);
+	printf(MSG_FACTURATION, order->tab_commandes[y].nom);
 	for (i = 0; i < specialites->nb_specialites; i++) { // On liste tout les specialité
-		if (commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
-			if (commande->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {  // On vérifie qu'une tache est affecté a la spécialité INDICE
+		if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
+			if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {  // On vérifie qu'une tache est affecté a la spécialité INDICE
 				if (bool == FAUX) {
 					printf("%s:%d", specialites->tab_specialites[i].nom,
-						(specialites->tab_specialites[i].cout_horaire * commande->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
+						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
 					bool = VRAI;
 				}
 				else
 				{
 					printf(", %s:%d", specialites->tab_specialites[i].nom,
-						(specialites->tab_specialites[i].cout_horaire * commande->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
+						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
 				}
 			}
 			else
