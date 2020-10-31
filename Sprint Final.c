@@ -152,108 +152,35 @@ void traite_tache(Commandes* order, Specialites* specialites, Travailleurs* work
 **/
 void traite_charge(Commandes* order, Specialites* specialites, Travailleurs* worker);
 /** brief
-*La fonction traite_facturation permet d'afectué la facturation de la commande lorsque celle ci est fini
+*La fonction traite_facturation permet d'effectuer la facturation de la commande lorsque celle ci est fini
 *elle prend en paramèter [In] l'entié non signé y
 *elle prend en paramètre [In]/[Out] le pointeur order qui est de type Commandes, le pointeur specialites qui est de type Specialites ainsi que le pointeur cutomer qui est de type Clients
 *elle n'a pas de paramètre [Out] rien n'est retourné
 **/
 void traite_facturation(Commandes* order, Specialites* specialites, Clients* customer, unsigned int y);
-// facturation La fonction est appelé a chaque progression de tache 
-void traite_facturation(Commandes* order, Specialites* specialites, Clients* customer, unsigned int y) {
-	unsigned int i, INDICE, k, j;
-	Booleen bool = FAUX;
-	printf(MSG_FACTURATION, order->tab_commandes[y].nom);
-	for (i = 0; i < specialites->nb_specialites; i++) { // On liste tout les specialité
-		if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
-			if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {  // On vérifie qu'une tache est affecté a la spécialité INDICE
-				if (bool == FAUX) {
-					printf("%s:%d", specialites->tab_specialites[i].nom,
-						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
-					bool = VRAI;
-				}
-				else
-				{
-					printf(", %s:%d", specialites->tab_specialites[i].nom,
-						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
-				}
-			}
-			else
-			{
-			}
-		}
+/** brief
+*La fonction traite_facturation_client permet d'effectuer la facturation pour chaque client quand toute les commandes sont terminé
+*elle prend en paramètre [In]/[Out] le pointeur order qui est de type Commandes, le pointeur specialites qui est de type Specialites ainsi que le pointeur cutomer qui est de type Clients
+*elle n'a pas de paramètre [Out] rien n'est retourné
+**/
+void traite_facturation_client(Commandes* order, Specialites* specialites, Clients* customer);
+/** brief
+*La fonction traite_progression permet de faire progressé les différents taches
+*elle prend en paramètre [In]/[Out] le pointeur order qui est de type Commandes, le pointeur specialites qui est de type Specialites ainsi que le pointeur customer qui est de type Clients 
+*elle n'a pas de paramètre [Out] rien n'est retourné
+**/
+void traite_progression(Commandes* order, Specialites* specialites, Clients* customer);
+void traite_affichage(int type, int donnée, Booleen* bool) {
+	if (strcmp(bool, "0") == 0) {
+		printf(type, donnée);
+		bool = VRAI;
 	}
-	printf("\n");
-	bool = FAUX;
-}
-void traite_facturation_client(Commandes* commande, Specialites* specialites, Clients* customer, Mot nom_commande) {
-	unsigned int i, y, k, j, prix_par_client = 0;
-	Booleen bool = FAUX;
-	printf("facturations : "); // Toute les commandes on été traité 
-	for (i = 0; i < customer->nb_clients; i++) {
-		for (k = 0; k < commande->nb_commandes; k++) {
-			if (i == commande->tab_commandes[k].idx_client) {
-				for (j = 0; j < specialites->nb_specialites; j++) {
-					prix_par_client += (commande->tab_commandes[k].taches_par_specialite[j].nb_heures_requises * specialites->tab_specialites[j].cout_horaire);
-				}
-			}
-		}
-		if (bool == FAUX) {
-			printf("%s:%d", customer->tab_clients[i].nom, prix_par_client);
-			bool = VRAI;
-			prix_par_client = 0;
-		}
-		else
-		{
-			printf(", %s:%d", customer->tab_clients[i].nom, prix_par_client);
-			prix_par_client = 0;
-		}
-	}
-	printf("\n");
-	bool = FAUX;
-	exit(EXIT_SUCCESS);
-}
-void traite_progression(Commandes* commande, Specialites* specialites, Clients* customer, Travailleurs* worker) {
-	Mot nom_commande;
-	get_id(nom_commande);
-	Mot nom_specialite;
-	get_id(nom_specialite);
-	unsigned int i, y;
-	Booleen t_fini = FAUX;
-	int heure = get_int(), différence;
-	for (i = 0; i < commande->nb_commandes; i++) {
-		if (strcmp(nom_commande, commande->tab_commandes[i].nom) == 0) {
-			for (y = 0; y < specialites->nb_specialites; y++) {
-				if (strcmp(nom_specialite, specialites->tab_specialites[y].nom) == 0) {
-					commande->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees += heure;
-					if ((commande->tab_commandes[i].taches_par_specialite[y].nb_heures_requises - commande->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees) == 0) {
-						commande->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees = commande->tab_commandes[i].taches_par_specialite[y].nb_heures_requises;
-					}
-					break;
-				}
-			}
-			break;
-		}
-	}
-	int s_taches_f = 0, taches_finies;
-	for (taches_finies = 0; taches_finies < specialites->nb_specialites; taches_finies++) {
-		if (commande->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_effectuees >= commande->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_requises && commande->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_requises !=0) {
-			s_taches_f ++;
-		}
-	}
-	if (s_taches_f == commande->tab_commandes[i].nb_taches) {
-		traite_facturation(commande, specialites, customer, i);
-		commande->nb_commandes_f++;	
-	}
-	if (commande->nb_commandes_f == commande->nb_commandes) {
-		traite_facturation_client(commande, specialites, customer, nom_commande);
+	else
+	{
+		printf(", ");
+		printf(type, donnée);
 	}
 }
-
-// interruption ------------------------ 
-void traite_interruption() {
-}
-// Fonction prennant en paramètre la nouvelle spécialité et le cout horaire
-
 //Boucle principale ---------------------------------------------------------- 
 int main(int argc, char* argv[]) {
 	if (argc >= 2 && strcmp("echo", argv[1]) == 0) {
@@ -320,7 +247,6 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 		if (strcmp(buffer, "interruption") == 0) {
-			traite_interruption();
 			break;
 		}
 		printf("!!! instruction inconnue >%s< !!!\n", buffer);
@@ -398,17 +324,9 @@ void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* sp
 	{
 		for (i = 0; i < specialites->nb_specialites; i++) {
 			printf(MSG_CONSULTATION_TRAVAILLEURS, specialites->tab_specialites[i].nom);
-
 			for (indice = 0; indice < list_worker->nb_travailleurs; indice++) {
 				if (list_worker->tab_travailleurs[indice].tags_competences[i] == VRAI) {
-					if (bool == FAUX) {
-						printf("%s", list_worker->tab_travailleurs[indice].nom);
-						bool = VRAI;
-					}
-					else
-					{
-						printf(", %s", list_worker->tab_travailleurs[indice].nom);
-					}
+					traite_affichage("%s", list_worker->tab_travailleurs[indice].nom, &bool);
 				}
 			}
 			printf("\n");
@@ -608,4 +526,93 @@ void traite_charge(Travailleurs* worker, Commandes* order, Specialites* speciali
 	}
 	printf("\n");
 	bool = FAUX;
+}
+// facturation La fonction est appelé a chaque progression de tache 
+void traite_facturation(Commandes* order, Specialites* specialites, Clients* customer, unsigned int y) {
+	unsigned int i, INDICE, k, j;
+	Booleen bool = FAUX;
+	printf(MSG_FACTURATION, order->tab_commandes[y].nom);
+	for (i = 0; i < specialites->nb_specialites; i++) { // On liste tout les specialité
+		if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {
+			if (order->tab_commandes[y].taches_par_specialite[i].nb_heures_requises != 0) {  // On vérifie qu'une tache est affecté a la spécialité INDICE
+				if (bool == FAUX) {
+					printf("%s:%d", specialites->tab_specialites[i].nom,
+						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
+					bool = VRAI;
+				}
+				else
+				{
+					printf(", %s:%d", specialites->tab_specialites[i].nom,
+						(specialites->tab_specialites[i].cout_horaire * order->tab_commandes[y].taches_par_specialite[i].nb_heures_effectuees));
+				}
+			}
+		}
+	}
+	printf("\n");
+	bool = FAUX;
+}
+// Facturation par clients lorsque toute les commandes sont terminé
+void traite_facturation_client(Commandes* order, Specialites* specialites, Clients* customer) {
+	unsigned int i, y, k, j, prix_par_client = 0;
+	Booleen bool = FAUX;
+	printf("facturations : "); // Toute les commandes on été traité 
+	for (i = 0; i < customer->nb_clients; i++) {
+		for (k = 0; k < order->nb_commandes; k++) {
+			if (i == order->tab_commandes[k].idx_client) {
+				for (j = 0; j < specialites->nb_specialites; j++) {
+					prix_par_client += (order->tab_commandes[k].taches_par_specialite[j].nb_heures_requises * specialites->tab_specialites[j].cout_horaire);
+				}
+			}
+		}
+		if (bool == FAUX) {
+			printf("%s:%d", customer->tab_clients[i].nom, prix_par_client);
+			bool = VRAI;
+			prix_par_client = 0;
+		}
+		else
+		{
+			printf(", %s:%d", customer->tab_clients[i].nom, prix_par_client);
+			prix_par_client = 0;
+		}
+	}
+	printf("\n");
+	bool = FAUX;
+	exit(EXIT_SUCCESS);
+}
+// Gère la proggression des taches
+void traite_progression(Commandes* order, Specialites* specialites, Clients* customer) {
+	Mot nom_commande;
+	get_id(nom_commande);
+	Mot nom_specialite;
+	get_id(nom_specialite);
+	unsigned int i, y;
+	Booleen t_fini = FAUX;
+	int heure = get_int(), différence;
+	for (i = 0; i < order->nb_commandes; i++) {
+		if (strcmp(nom_commande, order->tab_commandes[i].nom) == 0) {
+			for (y = 0; y < specialites->nb_specialites; y++) {
+				if (strcmp(nom_specialite, specialites->tab_specialites[y].nom) == 0) {
+					order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees += heure;
+					if ((order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises - order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees) == 0) {
+						order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees = order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises;
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+	int s_taches_f = 0, taches_finies;
+	for (taches_finies = 0; taches_finies < specialites->nb_specialites; taches_finies++) {
+		if (order->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_effectuees >= order->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_requises && order->tab_commandes[i].taches_par_specialite[taches_finies].nb_heures_requises != 0) {
+			s_taches_f++;
+		}
+	}
+	if (s_taches_f == order->tab_commandes[i].nb_taches) {
+		traite_facturation(order, specialites, customer, i);
+		order->nb_commandes_f++;
+	}
+	if (order->nb_commandes_f == order->nb_commandes) {
+		traite_facturation_client(order, specialites, customer, nom_commande);
+	}
 }
