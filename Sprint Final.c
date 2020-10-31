@@ -151,229 +151,7 @@ void traite_tache(Commandes* order, Specialites* specialites, Travailleurs* work
 *elle n'a pas de paramètre [Out] rien n'est retourné
 **/
 void traite_charge(Commandes* order, Specialites* specialites, Travailleurs* worker);
-void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites);
 
-// Consultation travailleurs---------------------- 
-void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites) {
-	unsigned int i, indice;
-	Mot nom_specialite;
-	get_id(nom_specialite);
-	Booleen bool = FAUX;
-	if (strcmp(nom_specialite, "tous") == 0)
-	{
-		for (i = 0; i < specialites->nb_specialites; i++) {
-			printf(MSG_CONSULTATION_TRAVAILLEURS, specialites->tab_specialites[i].nom);
-
-			for (indice = 0; indice < list_worker->nb_travailleurs; indice++) {
-				if (list_worker->tab_travailleurs[indice].tags_competences[i] == VRAI) {
-					if (bool == FAUX) {
-						printf("%s", list_worker->tab_travailleurs[indice].nom);
-						bool = VRAI;
-					}
-					else
-					{
-						printf(", %s", list_worker->tab_travailleurs[indice].nom);
-					}
-				}
-			}
-			printf("\n");
-			bool = FAUX;
-		}
-	}
-	else {
-		printf(MSG_CONSULTATION_TRAVAILLEURS, nom_specialite);
-		for (indice = 0; indice < specialites->nb_specialites; indice++) {
-			if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
-			{
-				break;
-			}
-		}
-		for (i = 0; i < list_worker->nb_travailleurs; i++) {
-			if (list_worker->tab_travailleurs[i].tags_competences[indice] == VRAI) {
-				if (bool == FAUX) {
-					printf("%s", list_worker->tab_travailleurs[i].nom);
-					bool = VRAI;
-				}
-				else
-				{
-					printf(", %s", list_worker->tab_travailleurs[i].nom);
-				}
-			}
-		}
-		printf("\n");
-
-	}
-}
-// Consultation commandes----------------
-void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
-	Mot nom_client;
-	get_id(nom_client);
-	unsigned int i, INDICE;
-	Booleen bool = FAUX;
-	if (strcmp(nom_client, "tous") == 0)
-	{
-		for (i = 0; i < liste_customer->nb_clients; i++) {
-			printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[i].nom);
-			for (INDICE = 0; INDICE < Order->nb_commandes; INDICE++) {
-				if (Order->tab_commandes[INDICE].idx_client == i) {
-					if (bool == FAUX) {
-						printf("%s", Order->tab_commandes[INDICE].nom);
-						bool = VRAI;
-					}
-					else
-					{
-						printf(", %s", Order->tab_commandes[INDICE].nom);
-					}
-				}
-			}
-			printf("\n");
-			bool = FAUX;
-		}
-	}
-	else {
-		printf(MSG_CONSULTATION_COMMANDE, nom_client);
-		for (i = 0; i < liste_customer->nb_clients; i++) {
-			if (strcmp(nom_client, liste_customer->tab_clients[i].nom) == 0)
-			{
-				break;
-			}
-		}
-		for (INDICE = 0; INDICE < Order->nb_commandes; INDICE++) {
-			if (Order->tab_commandes[INDICE].idx_client == i) {
-				if (bool == FAUX) {
-					printf("%s", Order->tab_commandes[INDICE].nom);
-					bool = VRAI;
-				}
-				else
-				{
-					printf(", %s", Order->tab_commandes[INDICE].nom);
-				}
-			}
-		}
-		printf("\n");
-		bool = FAUX;
-	}
-}
-//Nouvelle commande----------------
-void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
-	Mot nom_client;
-	unsigned int i, y;
-	get_id(Order->tab_commandes[Order->nb_commandes].nom);
-	get_id(nom_client);
-	for (i = 0; i < customer->nb_clients; i++) {
-		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
-			Order->tab_commandes[Order->nb_commandes].idx_client = i;
-	}
-	for (y = 0; y < MAX_SPECIALITES; y++) {
-		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_requises = 0;
-		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_effectuees = 0;
-		
-	}
-	Order->tab_commandes[Order->nb_commandes].nb_taches = 0;
-	Order->nb_commandes++;
-}
-// Consultation de l'avancement des commandes-------------------
-void traite_supervision(Commandes* Order, Specialites* specialites) {
-	unsigned int i, y;
-	Booleen bool = FAUX;
-	for (i = 0; i < Order->nb_commandes; i++) {
-		if (Order->nb_commandes != 0) {
-			printf(MSG_SUPERVISION, Order->tab_commandes[i].nom);
-			for (y = 0; y < specialites->nb_specialites; y++) {
-				if (Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises != 0) {
-					if (bool == FAUX) {
-						printf("%s:%d/%d", specialites->tab_specialites[y].nom,
-							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees,
-							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises);
-						bool = VRAI;
-					}
-					else
-					{
-						printf(", %s:%d/%d", specialites->tab_specialites[y].nom,
-							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees,
-							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises);
-					}
-
-				}
-			}
-			printf("\n");
-			bool = FAUX;
-		}
-	}
-}
-
-void traite_tache(Commandes* commande, Specialites* specialites, Travailleurs* worker) {
-	Mot nom_commande;
-	get_id(nom_commande);
-	Mot nom_specialite;
-	get_id(nom_specialite);
-	unsigned int h_requises = get_int(), i, y, indice, k, z, j = 0;;
-	for (indice = 0; indice < specialites->nb_specialites; indice++) {
-		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
-		{
-			break;
-		}
-	}
-	for (z = 0; z < commande->nb_commandes; z++) {
-		if (strcmp(nom_commande, commande->tab_commandes[z].nom) == 0) {
-			break;
-		}
-	}
-	unsigned int min_tra = 0;
-	for (k = 0; k < worker->nb_travailleurs; k++) {
-		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) {
-			if (k == 0) {
-				min_tra = worker->tab_travailleurs[k].nb_heures_travail;
-			}
-			else if (worker->tab_travailleurs[k].nb_heures_travail < min_tra) {
-				min_tra = worker->tab_travailleurs[k].nb_heures_travail;
-
-			}
-		}
-	}
-	while (worker->tab_travailleurs[j].nb_heures_travail != min_tra) {
-		j++;
-	}
-	strcpy(commande->tab_commandes[z].taches_par_specialite[indice].nom, nom_specialite);
-	commande->tab_commandes[z].taches_par_specialite[indice].nb_heures_effectuees = 0;
-	commande->tab_commandes[z].taches_par_specialite[indice].nb_heures_requises = h_requises;
-	commande->tab_commandes[z].taches_par_specialite[indice].idx_travailleur = j;
-	commande->tab_commandes[z].nb_taches++;
-	worker->tab_travailleurs[j].nb_heures_travail += h_requises;
-}
-void traite_charge(Travailleurs* worker, Commandes* order, Specialites* specialites) {
-	Mot nom_travailleur;
-	get_id(nom_travailleur);
-	unsigned int i, y, k;
-	Booleen bool = FAUX;
-	printf(MSG_CHARGE, nom_travailleur);
-	for (i = 0; i < order->nb_commandes; i++) {
-		for (y = 0; y < specialites->nb_specialites; y++) {
-			if (order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees < order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises) {
-				for (k = 0; k < worker->nb_travailleurs; k++) {
-					if (strcmp(nom_travailleur, worker->tab_travailleurs[k].nom) == 0) {
-						if (order->tab_commandes[i].taches_par_specialite[y].idx_travailleur == k) {
-							if (bool == FAUX) {
-								printf("%s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
-									(order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
-										order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees));
-								bool = VRAI;
-							}
-							else
-							{
-								printf(", %s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
-									order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
-									order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	printf("\n");
-	bool = FAUX;
-}
 // facturation La fonction est appelé a chaque progression de tache 
 void traite_facturation(Commandes* commande, Specialites* specialites, Clients* customer, unsigned int y) {
 	unsigned int i, INDICE, k, j, prix_par_client = 0, cpt = 0;
@@ -603,4 +381,225 @@ void traite_embauche(Travailleurs* worker, Specialites* specialites) {
 void traite_demarche(Clients* customer) {
 	get_id(customer->tab_clients[customer->nb_clients].nom); //enregistre les clients
 	customer->nb_clients += 1;
+}
+// Consultation travailleurs---------------------- 
+void traite_consultation_travailleurs(Travailleurs* list_worker, Specialites* specialites) {
+	unsigned int i, indice;
+	Mot nom_specialite;
+	get_id(nom_specialite);
+	Booleen bool = FAUX;
+	if (strcmp(nom_specialite, "tous") == 0)
+	{
+		for (i = 0; i < specialites->nb_specialites; i++) {
+			printf(MSG_CONSULTATION_TRAVAILLEURS, specialites->tab_specialites[i].nom);
+
+			for (indice = 0; indice < list_worker->nb_travailleurs; indice++) {
+				if (list_worker->tab_travailleurs[indice].tags_competences[i] == VRAI) {
+					if (bool == FAUX) {
+						printf("%s", list_worker->tab_travailleurs[indice].nom);
+						bool = VRAI;
+					}
+					else
+					{
+						printf(", %s", list_worker->tab_travailleurs[indice].nom);
+					}
+				}
+			}
+			printf("\n");
+			bool = FAUX;
+		}
+	}
+	else {
+		printf(MSG_CONSULTATION_TRAVAILLEURS, nom_specialite);
+		for (indice = 0; indice < specialites->nb_specialites; indice++) {
+			if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+			{
+				break;
+			}
+		}
+		for (i = 0; i < list_worker->nb_travailleurs; i++) {
+			if (list_worker->tab_travailleurs[i].tags_competences[indice] == VRAI) {
+				if (bool == FAUX) {
+					printf("%s", list_worker->tab_travailleurs[i].nom);
+					bool = VRAI;
+				}
+				else
+				{
+					printf(", %s", list_worker->tab_travailleurs[i].nom);
+				}
+			}
+		}
+		printf("\n");
+
+	}
+}
+// Consultation commandes----------------
+void traite_consultation_commandes(Clients* liste_customer, Commandes* Order) {
+	Mot nom_client;
+	get_id(nom_client);
+	unsigned int i, INDICE;
+	Booleen bool = FAUX;
+	if (strcmp(nom_client, "tous") == 0)
+	{
+		for (i = 0; i < liste_customer->nb_clients; i++) {
+			printf(MSG_CONSULTATION_COMMANDE, liste_customer->tab_clients[i].nom);
+			for (INDICE = 0; INDICE < Order->nb_commandes; INDICE++) {
+				if (Order->tab_commandes[INDICE].idx_client == i) {
+					if (bool == FAUX) {
+						printf("%s", Order->tab_commandes[INDICE].nom);
+						bool = VRAI;
+					}
+					else
+					{
+						printf(", %s", Order->tab_commandes[INDICE].nom);
+					}
+				}
+			}
+			printf("\n");
+			bool = FAUX;
+		}
+	}
+	else {
+		printf(MSG_CONSULTATION_COMMANDE, nom_client);
+		for (i = 0; i < liste_customer->nb_clients; i++) {
+			if (strcmp(nom_client, liste_customer->tab_clients[i].nom) == 0)
+			{
+				break;
+			}
+		}
+		for (INDICE = 0; INDICE < Order->nb_commandes; INDICE++) {
+			if (Order->tab_commandes[INDICE].idx_client == i) {
+				if (bool == FAUX) {
+					printf("%s", Order->tab_commandes[INDICE].nom);
+					bool = VRAI;
+				}
+				else
+				{
+					printf(", %s", Order->tab_commandes[INDICE].nom);
+				}
+			}
+		}
+		printf("\n");
+		bool = FAUX;
+	}
+}
+//Nouvelle commande----------------
+void traite_nouvelle_commande(Commandes* Order, Clients* customer) {
+	Mot nom_client;
+	unsigned int i, y;
+	get_id(Order->tab_commandes[Order->nb_commandes].nom);
+	get_id(nom_client);
+	for (i = 0; i < customer->nb_clients; i++) {
+		if (strcmp(nom_client, customer->tab_clients[i].nom) == 0)
+			Order->tab_commandes[Order->nb_commandes].idx_client = i;
+	}
+	for (y = 0; y < MAX_SPECIALITES; y++) {
+		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_requises = 0;
+		Order->tab_commandes[Order->nb_commandes].taches_par_specialite[y].nb_heures_effectuees = 0;
+
+	}
+	Order->tab_commandes[Order->nb_commandes].nb_taches = 0;
+	Order->nb_commandes++;
+}
+// Consultation de l'avancement des commandes-------------------
+void traite_supervision(Commandes* Order, Specialites* specialites) {
+	unsigned int i, y;
+	Booleen bool = FAUX;
+	for (i = 0; i < Order->nb_commandes; i++) {
+		if (Order->nb_commandes != 0) {
+			printf(MSG_SUPERVISION, Order->tab_commandes[i].nom);
+			for (y = 0; y < specialites->nb_specialites; y++) {
+				if (Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises != 0) {
+					if (bool == FAUX) {
+						printf("%s:%d/%d", specialites->tab_specialites[y].nom,
+							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees,
+							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises);
+						bool = VRAI;
+					}
+					else
+					{
+						printf(", %s:%d/%d", specialites->tab_specialites[y].nom,
+							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees,
+							Order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises);
+					}
+
+				}
+			}
+			printf("\n");
+			bool = FAUX;
+		}
+	}
+}
+
+void traite_tache(Commandes* commande, Specialites* specialites, Travailleurs* worker) {
+	Mot nom_commande;
+	get_id(nom_commande);
+	Mot nom_specialite;
+	get_id(nom_specialite);
+	unsigned int h_requises = get_int(), i, y, indice, k, z, j = 0;;
+	for (indice = 0; indice < specialites->nb_specialites; indice++) {
+		if (strcmp(nom_specialite, specialites->tab_specialites[indice].nom) == 0)
+		{
+			break;
+		}
+	}
+	for (z = 0; z < commande->nb_commandes; z++) {
+		if (strcmp(nom_commande, commande->tab_commandes[z].nom) == 0) {
+			break;
+		}
+	}
+	unsigned int min_tra = 0;
+	for (k = 0; k < worker->nb_travailleurs; k++) {
+		if (worker->tab_travailleurs[k].tags_competences[indice] == VRAI) {
+			if (k == 0) {
+				min_tra = worker->tab_travailleurs[k].nb_heures_travail;
+			}
+			else if (worker->tab_travailleurs[k].nb_heures_travail < min_tra) {
+				min_tra = worker->tab_travailleurs[k].nb_heures_travail;
+
+			}
+		}
+	}
+	while (worker->tab_travailleurs[j].nb_heures_travail != min_tra) {
+		j++;
+	}
+	strcpy(commande->tab_commandes[z].taches_par_specialite[indice].nom, nom_specialite);
+	commande->tab_commandes[z].taches_par_specialite[indice].nb_heures_effectuees = 0;
+	commande->tab_commandes[z].taches_par_specialite[indice].nb_heures_requises = h_requises;
+	commande->tab_commandes[z].taches_par_specialite[indice].idx_travailleur = j;
+	commande->tab_commandes[z].nb_taches++;
+	worker->tab_travailleurs[j].nb_heures_travail += h_requises;
+}
+void traite_charge(Travailleurs* worker, Commandes* order, Specialites* specialites) {
+	Mot nom_travailleur;
+	get_id(nom_travailleur);
+	unsigned int i, y, k;
+	Booleen bool = FAUX;
+	printf(MSG_CHARGE, nom_travailleur);
+	for (i = 0; i < order->nb_commandes; i++) {
+		for (y = 0; y < specialites->nb_specialites; y++) {
+			if (order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees < order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises) {
+				for (k = 0; k < worker->nb_travailleurs; k++) {
+					if (strcmp(nom_travailleur, worker->tab_travailleurs[k].nom) == 0) {
+						if (order->tab_commandes[i].taches_par_specialite[y].idx_travailleur == k) {
+							if (bool == FAUX) {
+								printf("%s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
+									(order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
+										order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees));
+								bool = VRAI;
+							}
+							else
+							{
+								printf(", %s/%s/%dheure(s)", order->tab_commandes[i].nom, specialites->tab_specialites[y].nom,
+									order->tab_commandes[i].taches_par_specialite[y].nb_heures_requises -
+									order->tab_commandes[i].taches_par_specialite[y].nb_heures_effectuees);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("\n");
+	bool = FAUX;
 }
