@@ -18,8 +18,8 @@ Booleen EchoActif = FAUX;
 #define MSG_SUPERVISION "## consultation de l'avancement des commandes\n"
 #define MSG_TACHE "## la commande \"%s\" requiere la specialite \"%s\" (nombre d'heures \"%d\")\n"
 #define MSG_CHARGE "## consultation de la charge de travail de \"%s\"\n"
-#define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\": \"%d\" heures de plus ont ete realisees\n"
-#define MSG_SPECIALITE_TOUS "##consultation des travailleurs competents pour chaque specialite\n"
+#define MSG_PROGRESSION "## pour la commande \"%s\", pour la specialite \"%s\" : \"%d\" heures de plus ont ete realisees\n"
+#define MSG_SPECIALITE_TOUS "## consultation des travailleurs competents pour chaque specialite\n"
 #define MSG_CLIENT_TOUS "## consultation des commandes effectuees par chaque client\n"
 // Lexemes -------------------------------------------------------------------- 
 #define LGMOT 35
